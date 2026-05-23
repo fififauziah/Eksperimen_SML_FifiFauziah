@@ -13,7 +13,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 # Load dataset
-df = pd.read_csv("loan_raw/loan.csv")
+df = pd.read_csv("loan.csv")
 
 # =========================
 # HANDLE MISSING VALUES
