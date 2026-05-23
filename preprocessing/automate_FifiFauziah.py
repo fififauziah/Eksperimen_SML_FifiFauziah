@@ -10,48 +10,48 @@ Original file is located at
 """
 
 import pandas as pd
-
 from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import StandardScaler
 
-def preprocess(input_path, output_path):
+# Load dataset
+df = pd.read_csv("loan_raw/loan.csv")
 
-    df = pd.read_csv(input_path)
+# =========================
+# HANDLE MISSING VALUES
+# =========================
 
-    # Missing values
-    for col in df.columns:
+# Kolom numerik
+num_cols = df.select_dtypes(include=['int64', 'float64']).columns
 
-        if df[col].dtype == 'object':
-            df[col].fillna(df[col].mode()[0], inplace=True)
+# Kolom kategorikal
+cat_cols = df.select_dtypes(include=['object']).columns
 
-        else:
-            df[col].fillna(df[col].median(), inplace=True)
+# Isi missing numerik dengan median
+for col in num_cols:
+    df[col] = df[col].fillna(df[col].median())
 
-    # Encoding
-    le = LabelEncoder()
+# Isi missing kategorikal dengan modus
+for col in cat_cols:
+    df[col] = df[col].fillna(df[col].mode()[0])
 
-    for col in df.select_dtypes(include='object').columns:
-        df[col] = le.fit_transform(df[col])
+# =========================
+# ENCODING
+# =========================
 
-    # Scaling
-    X = df.drop("Loan_Status", axis=1)
-    y = df["Loan_Status"]
+le = LabelEncoder()
 
-    scaler = StandardScaler()
+for col in cat_cols:
+    df[col] = le.fit_transform(df[col])
 
-    X_scaled = scaler.fit_transform(X)
+# =========================
+# HAPUS DUPLIKAT
+# =========================
 
-    processed = pd.DataFrame(X_scaled, columns=X.columns)
+df.drop_duplicates(inplace=True)
 
-    processed["Loan_Status"] = y
+# =========================
+# SAVE PREPROCESSING
+# =========================
 
-    processed.to_csv(output_path, index=False)
+df.to_csv("preprocessing/loan_preprocessing.csv", index=False)
 
-    print("Preprocessing berhasil!")
-
-if __name__ == "__main__":
-
-    preprocess(
-        "loan.csv",
-        "loan_preprocessed.csv"
-    )
+print("Preprocessing selesai!")
